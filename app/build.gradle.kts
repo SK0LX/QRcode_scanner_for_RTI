@@ -4,11 +4,11 @@ plugins {
 }
 
 android {
-    namespace = "com.example.rtiapp"
+    namespace = "com.example.mobilescanner"
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.example.rtiapp"
+        applicationId = "com.example.mobilescanner"
         minSdk = 24
         targetSdk = 34
         versionCode = 1
@@ -50,6 +50,7 @@ android {
 }
 
 dependencies {
+    implementation("com.journeyapps:zxing-android-embedded:4.3.0")
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)

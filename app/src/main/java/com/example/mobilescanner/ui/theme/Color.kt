@@ -1,4 +1,4 @@
-package com.example.rtiapp.ui.theme
+package com.example.mobilescanner.ui.theme
 
 import androidx.compose.ui.graphics.Color
 

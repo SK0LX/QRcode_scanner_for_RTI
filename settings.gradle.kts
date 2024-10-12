@@ -19,6 +19,6 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "RTIApp"
+rootProject.name = "MobileScanner"
 include(":app")
  

@@ -1,4 +1,4 @@
-package com.example.rtiapp
+package com.example.mobilescanner
 
 import org.junit.Test
 

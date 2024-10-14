@@ -9,7 +9,7 @@ android {
 
     defaultConfig {
         applicationId = "com.example.mobilescanner"
-        minSdk = 24
+        minSdk = 30
         targetSdk = 34
         versionCode = 1
         versionName = "1.0"
@@ -51,6 +51,10 @@ android {
 
 dependencies {
     implementation("com.journeyapps:zxing-android-embedded:4.3.0")
+    implementation ("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
+    implementation ("org.apache.poi:poi:5.2.0")
+    implementation ("org.apache.xmlbeans:xmlbeans:5.0.3")
+    implementation("org.apache.logging.log4j:log4j-api:2.24.1")
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
@@ -60,6 +64,7 @@ dependencies {
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
+    implementation(libs.androidx.appcompat)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

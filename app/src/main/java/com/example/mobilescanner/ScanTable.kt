@@ -28,7 +28,8 @@ data class ScanRecord(
     val routeSheetNumber: String,
     val partName: String,
     val partCode: String,
-    val quantity: Int
+    val quantity: Int,
+    val measurement: String
 )
 
 class ScanTable(private val context: Context) {
@@ -47,7 +48,8 @@ class ScanTable(private val context: Context) {
                 routeSheetNumber = data[1].trim(),
                 partName = data[2].trim(),
                 partCode = data[3].trim(),
-                quantity = data[4].trim().toInt()
+                quantity = data[4].trim().toInt(),
+                measurement = data[5].trim()
             )
         )
         saveToExcel()
@@ -65,6 +67,7 @@ class ScanTable(private val context: Context) {
         headerRow.createCell(2).setCellValue("Наименование детали")
         headerRow.createCell(3).setCellValue("Код детали")
         headerRow.createCell(4).setCellValue("Количество")
+        headerRow.createCell(5).setCellValue("Единица измерения")
 
         // Заполнение данными
         records.forEachIndexed { index, record ->
@@ -74,6 +77,7 @@ class ScanTable(private val context: Context) {
             row.createCell(2).setCellValue(record.partName)
             row.createCell(3).setCellValue(record.partCode)
             row.createCell(4).setCellValue(record.quantity.toDouble())
+            row.createCell(5).setCellValue(record.measurement)
         }
 
         // Сохранение файла
@@ -94,7 +98,7 @@ class ScanTable(private val context: Context) {
             val info = ("$currentDateTime;$data").split(";")
 
             // Проверка, чтобы количество элементов было равно 5
-            if (info.size != 5) {
+            if (info.size != 6) {
                 throw IllegalArgumentException("Неверное количество элементов: ${info.size}")
             }
 

@@ -17,6 +17,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.core.content.FileProvider
 import com.example.mobilescanner.ui.theme.MobileScannerTheme
+import com.journeyapps.barcodescanner.CaptureActivity
 import com.journeyapps.barcodescanner.ScanContract
 import com.journeyapps.barcodescanner.ScanOptions
 import java.io.File
@@ -26,6 +27,7 @@ class MainActivity : ComponentActivity() {
     private lateinit var scanTable: ScanTable
     private val scanLauncher = registerForActivityResult(ScanContract()) { result ->
         if (result.contents == null) {
+            Toast.makeText(this, "Не сохранено", Toast.LENGTH_SHORT).show()
             // Обработка ошибки сканирования
         } else {
             scanTable.add(result.contents)
@@ -42,10 +44,10 @@ class MainActivity : ComponentActivity() {
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Center) {
                     Button(onClick = { scan() }) {
-                        Text(text = "Scan")
+                        Text(text = "Сканирование")
                     }
                     Button(onClick = { share() }) {
-                        Text(text = "Share")
+                        Text(text = "Отправить")
                     }
                 }
             }
@@ -55,12 +57,11 @@ class MainActivity : ComponentActivity() {
     private fun scan() {
         val options = ScanOptions()
         options.setDesiredBarcodeFormats(ScanOptions.QR_CODE)
-        options.setPrompt("Scan a QRCode")
+        options.setPrompt("Сканирую в QRCode")
         options.setCameraId(0)
-        options.setBeepEnabled(false)
+        options.setBeepEnabled(true)
         options.setBarcodeImageEnabled(true)
         options.setOrientationLocked(false)
-        options.setBeepEnabled(false)
 
         scanLauncher.launch(options)
     }

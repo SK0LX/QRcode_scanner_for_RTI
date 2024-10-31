@@ -97,7 +97,7 @@ class ScanTable(private val context: Context) {
             val currentDateTime = dateFormat.format(Date())
             val info = ("$currentDateTime;$data").split(";")
 
-            // Проверка, чтобы количество элементов было равно 5
+            // Проверка, чтобы количество элементов было равно 6
             if (info.size != 6) {
                 throw IllegalArgumentException("Неверное количество элементов: ${info.size}")
             }
@@ -105,10 +105,18 @@ class ScanTable(private val context: Context) {
             // Добавление информации в таблицу
             addTable(info)
 
+        } catch (e: IllegalArgumentException) {
+            // Обработка IllegalArgumentException
+            Toast.makeText(context, e.message, Toast.LENGTH_SHORT).show()
         } catch (e: NumberFormatException) {
-            throw IllegalArgumentException("Неверный формат данных")
+            // Обработка NumberFormatException
+            Toast.makeText(context, "Неудалось считать данный QrCode.", Toast.LENGTH_SHORT).show()
+        } catch (e: Exception) {
+            // Обработка других исключений
+            Toast.makeText(context, "Произошла ошибка: ${e.message}", Toast.LENGTH_SHORT).show()
         }
     }
+
 }
 
 

@@ -1,34 +1,20 @@
-import android.Manifest
-import android.app.Activity
 import android.content.Context
-import android.content.pm.PackageManager
-import android.os.Build
-import android.os.Environment
 import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
-import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
 import org.apache.poi.hssf.usermodel.HSSFWorkbook
 import java.io.File
 import java.io.FileOutputStream
-import java.io.IOException
 import java.lang.IllegalArgumentException
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
-import android.os.Bundle
-import android.widget.Button
-import android.widget.EditText
-import androidx.appcompat.app.AppCompatActivity
-import java.io.InputStreamReader
-import java.io.BufferedReader
 
 data class ScanRecord(
     val scanDateTime: String,
     val routeSheetNumber: String,
     val partName: String,
     val partCode: String,
-    val quantity: Int,
+    var quantity: Int,
     val measurement: String
 )
 
@@ -117,6 +103,24 @@ class ScanTable(private val context: Context) {
         }
     }
 
+    fun saveChangesFromUser(number: Int){
+        if (records.size == 0){
+            Toast.makeText(context, "Отсканируйте сначала QrCode", Toast.LENGTH_SHORT).show()
+            return
+        }
+        records[records.size - 1].quantity = number
+        saveToExcel()
+    }
+
+    fun takeLastCount(): String {
+        if (records.size == 0)
+            return ""
+        return records[records.size - 1].quantity.toString()
+    }
+
+    fun takeLastType(): String {
+        if (records.size == 0)
+            return "Кол-во"
+        return records[records.size - 1].measurement
+    }
 }
-
-

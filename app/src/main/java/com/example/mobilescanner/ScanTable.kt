@@ -21,6 +21,10 @@ data class ScanRecord(
 class ScanTable(private val context: Context) {
     private val records = mutableListOf<ScanRecord>()
     private lateinit var permissionLauncher: ActivityResultLauncher<String>
+    public val isEmpty:Boolean
+        get() {
+            return records.size == 0
+        }
 
     private fun addTable(record: ScanRecord) {
         records.add(record)
@@ -122,5 +126,9 @@ class ScanTable(private val context: Context) {
         if (records.size == 0)
             return "Кол-во"
         return records[records.size - 1].measurement
+    }
+
+    fun clear(){
+        records.clear()
     }
 }

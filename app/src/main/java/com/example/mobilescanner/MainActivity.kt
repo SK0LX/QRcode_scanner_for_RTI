@@ -126,41 +126,31 @@ class MainActivity : ComponentActivity() {
                 .fillMaxSize().padding(16.dp)
         ) {
             // Верхняя часть с изображением и текстом
-            Row(
-                horizontalArrangement = Arrangement.Start,
-                modifier = Modifier.fillMaxWidth().padding(vertical = 16.dp)
+            Box(
+                modifier = Modifier.fillMaxWidth().padding(10.dp)
             ) {
-                Image(
-                    painter = painterResource(id = R.drawable.logo_rti),
-                    contentDescription = "Изображение",
-                    modifier = Modifier
-                        .size(100.dp)
-                )
-
-                Spacer(modifier = Modifier.width(16.dp))
-
-                Column(
-                    modifier = Modifier.wrapContentSize(),
-                    verticalArrangement = Arrangement.Center,
-                    horizontalAlignment = Alignment.CenterHorizontally
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(16.dp),
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Spacer(modifier = Modifier.height(16.dp))
-
-                    Text(
-                        text = "ПАО",
-                        fontSize = 20.sp,
-                        color = Color(0xFF800080)
+                    Image(
+                        painter = painterResource(id = R.drawable.logo_rti),
+                        contentDescription = "Изображение",
+                        modifier = Modifier
+                            .size(30.dp)
                     )
-                    Text(text = "Уральский завод",
-                        fontSize = 20.sp,
-                        color = Color(0xFF800080))
-                    Text(text = "РТИ",
-                        fontSize = 20.sp,
-                        color = Color(0xFF800080))
-                }
 
-                Spacer(modifier = Modifier.width(16.dp))
+                    Column {
+                        Text(
+                            text = "ПАО Уральский завод РТИ",
+                            fontSize = 15.sp,
+                            color = Color(0xFF800080)
+                        )
+                    }
+                }
             }
+
 
             // Поле для отображения последнего отсканированного QR-кода
             OutlinedTextField(
@@ -170,8 +160,8 @@ class MainActivity : ComponentActivity() {
                 readOnly = true,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(100.dp)
-                    .padding(bottom = 16.dp, top = 16.dp)
+                    .height(185.dp)
+                    .padding(bottom = 16.dp, top = 5.dp)
             )
 
             // Кнопка для сканирования
@@ -191,13 +181,22 @@ class MainActivity : ComponentActivity() {
                 modifier = Modifier.fillMaxWidth().padding(16.dp)
             ) {
                 Box(
-                    modifier = Modifier.width(100.dp).height(70.dp),
+                    modifier = Modifier.width(120.dp).height(70.dp),
                     contentAlignment = Alignment.Center // Центрируем содержимое внутри Box
                 ) {
                     OutlinedTextField(
                         value = quantity,
                         onValueChange = {
-                            quantity = it.takeIf { it.length <= 4 && it.all { char -> char.isDigit() } } ?: quantity
+                            val regex = if (lastType == "ШТ") {
+                                Regex("\\d{1,4}") // Целые числа до 4 знаков
+                            } else {
+                                Regex("\\d{1,4}+(\\.\\d{0,3})?") // Нечеткие числа с 3 знаками после запятой
+                            }
+
+                            // Проверяем, соответствует ли ввод регулярному выражению
+                            if (it.isEmpty() || regex.matches(it)) {
+                                quantity = it
+                            }
                         },
                         label = { Text(lastCount) },
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
@@ -226,13 +225,13 @@ class MainActivity : ComponentActivity() {
             // Кнопка для сохранения с проверкой на пустое значение
             Button(
                 onClick = {
-                    if (quantity.isNotEmpty() && quantity.all { it.isDigit() }) {
-                        if (lastCount.isDigitsOnly() && quantity.toInt() in 1..lastCount.toInt())
-                            scanTable.saveChangesFromUser(quantity.toInt())
+                    if (quantity.isNotEmpty()) {
+                        if (quantity.toDouble() > 0)
+                            scanTable.saveChangesFromUser(quantity.toDouble())
                         else {
                             Toast.makeText(
                                 this@MainActivity,
-                                "Введите число от 1 до $lastCount",
+                                "Введенное число больше 0.",
                                 Toast.LENGTH_SHORT
                             ).show()
                         }

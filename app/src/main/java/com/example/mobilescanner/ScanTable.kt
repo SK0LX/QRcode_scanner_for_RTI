@@ -14,7 +14,7 @@ data class ScanRecord(
     val routeSheetNumber: String,
     val partName: String,
     val partCode: String,
-    var quantity: Int,
+    var quantity: Double,
     val measurement: String
 )
 
@@ -38,7 +38,7 @@ class ScanTable(private val context: Context) {
                 routeSheetNumber = data[1].trim(),
                 partName = data[2].trim(),
                 partCode = data[3].trim(),
-                quantity = data[4].trim().toInt(),
+                quantity = data[4].trim().toDouble(),
                 measurement = data[5].trim()
             )
         )
@@ -107,7 +107,7 @@ class ScanTable(private val context: Context) {
         }
     }
 
-    fun saveChangesFromUser(number: Int){
+    fun saveChangesFromUser(number: Double){
         if (records.size == 0){
             Toast.makeText(context, "Отсканируйте сначала QrCode", Toast.LENGTH_SHORT).show()
             return

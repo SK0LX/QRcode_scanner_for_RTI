@@ -39,8 +39,9 @@ import java.io.File
 
 class MainActivity : ComponentActivity() {
     private lateinit var scanTable: ScanTable
-    private var lastCount: String = "1234"
+    private var lastCount: String = ""
     private var lastType: String = "Кол-во"
+    private var quantity by mutableStateOf("")
     private val scanLauncher = registerForActivityResult(ScanContract()) { result ->
         if (result.contents == null) {
             Toast.makeText(this, "Не сохранено", Toast.LENGTH_SHORT).show()
@@ -48,7 +49,13 @@ class MainActivity : ComponentActivity() {
             scanTable.add(result.contents)
             lastScannedCode = result.contents
             lastCount = scanTable.takeLastCount()
+
             lastType = scanTable.takeLastType()
+            if (lastType == "ШТ"){
+                lastCount = lastCount.split(".")[0]
+            }
+            quantity = lastCount
+
         }
     }
 
@@ -73,6 +80,7 @@ class MainActivity : ComponentActivity() {
         options.setBeepEnabled(true)
         options.setBarcodeImageEnabled(true)
         options.setOrientationLocked(false)
+        options.setTorchEnabled(true)
 
         scanLauncher.launch(options)
     }
@@ -111,14 +119,14 @@ class MainActivity : ComponentActivity() {
     private fun clearUI(){
         lastScannedCode = ""
         lastType = "Кол-во"
-        lastCount = "1234"
+        lastCount = ""
+        quantity = ""
     }
 
     @Preview
     @Composable
     fun MainScreen() {
         val context = LocalContext.current
-        var quantity by remember { mutableStateOf("") }
         var showError by remember { mutableStateOf(false) }
 
         Column(

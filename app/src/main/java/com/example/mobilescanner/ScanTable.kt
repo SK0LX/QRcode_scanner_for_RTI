@@ -1,6 +1,16 @@
+import android.app.Activity
 import android.content.Context
+import android.content.Intent
+import android.provider.Settings
+import android.view.Gravity
+import android.view.LayoutInflater
+import android.view.ViewGroup
+import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
+import androidx.compose.ui.graphics.Color
+import com.example.mobilescanner.R
+import com.google.zxing.integration.android.IntentIntegrator.REQUEST_CODE
 import org.apache.poi.hssf.usermodel.HSSFWorkbook
 import java.io.File
 import java.io.FileOutputStream
@@ -38,7 +48,7 @@ class ScanTable(private val context: Context) {
                 routeSheetNumber = data[1].trim(),
                 partName = data[2].trim(),
                 partCode = data[3].trim(),
-                quantity = data[4].trim().toDouble(),
+                quantity = checkQuantity(data[4]),
                 measurement = data[5].trim()
             )
         )
@@ -77,7 +87,8 @@ class ScanTable(private val context: Context) {
         workbook.write(outputStream)
         workbook.close()
         outputStream.close()
-        Toast.makeText(context, "Сохранено", Toast.LENGTH_SHORT).show()
+        CustomToastMakeText(context, "Сохранено", Toast.LENGTH_SHORT,
+            android.graphics.Color.BLACK)
     }
 
     fun add(data: String) {
@@ -97,19 +108,23 @@ class ScanTable(private val context: Context) {
 
         } catch (e: IllegalArgumentException) {
             // Обработка IllegalArgumentException
-            Toast.makeText(context, e.message, Toast.LENGTH_SHORT).show()
+            CustomToastMakeText(context, e.toString(), Toast.LENGTH_SHORT,
+                android.graphics.Color.RED)
         } catch (e: NumberFormatException) {
             // Обработка NumberFormatException
-            Toast.makeText(context, "Неудалось считать данный QrCode.", Toast.LENGTH_SHORT).show()
+            CustomToastMakeText(context, "Неудалось считать данный QrCode.",
+                Toast.LENGTH_SHORT, android.graphics.Color.RED)
         } catch (e: Exception) {
             // Обработка других исключений
-            Toast.makeText(context, "Произошла ошибка: ${e.message}", Toast.LENGTH_SHORT).show()
+            CustomToastMakeText(context, "Произошла ошибка: ${e.message}",
+                Toast.LENGTH_SHORT, android.graphics.Color.RED)
         }
     }
 
     fun saveChangesFromUser(number: Double){
         if (records.size == 0){
-            Toast.makeText(context, "Отсканируйте сначала QrCode", Toast.LENGTH_SHORT).show()
+            CustomToastMakeText(context, "Отсканируйте сначала QrCode",
+                Toast.LENGTH_SHORT,android.graphics.Color.BLACK)
             return
         }
         records[records.size - 1].quantity = number
@@ -131,4 +146,32 @@ class ScanTable(private val context: Context) {
     fun clear(){
         records.clear()
     }
+
+    fun checkQuantity(line:String) : Double{
+        if (line == " " || line == ""){
+            return 0.0
+        }
+        return line.toDouble()
+    }
+
+    fun CustomToastMakeText(context: Context, text: CharSequence, duration: Int, color: Int) {
+        // Проверяем, есть ли разрешение на отображение оверлея
+        if (!Settings.canDrawOverlays(context)) {
+            // Если разрешение не предоставлено, запрашиваем его
+            val intent = Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION)
+            // Запускаем активность для получения разрешения
+            (context as Activity).startActivityForResult(intent, REQUEST_CODE)
+        } else {
+            // Если разрешение есть, показываем кастомный Toast
+            CustomToast(context)
+                .setText(text.toString())
+                .setBackgroundColor(color)
+                .setTextColor(android.graphics.Color.WHITE)
+                .setTextSize(24f)
+                .setGravity(Gravity.CENTER_HORIZONTAL or Gravity.BOTTOM, 100)
+                .show()
+        }
+    }
+
+
 }

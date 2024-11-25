@@ -1,16 +1,20 @@
 package com.example.mobilescanner
 
+import CustomToast
 import ScanTable
 import android.app.Activity
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.provider.Settings
 import android.util.Log
+import android.view.Gravity
+import android.view.ViewGroup
+import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.activity.result.ActivityResultLauncher
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -31,11 +35,14 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.FileProvider
-import androidx.core.text.isDigitsOnly
 import com.example.mobilescanner.ui.theme.MobileScannerTheme
 import com.journeyapps.barcodescanner.ScanContract
 import com.journeyapps.barcodescanner.ScanOptions
 import java.io.File
+import androidx.core.widget.TextViewCompat
+import com.google.zxing.integration.android.IntentIntegrator.REQUEST_CODE
+import kotlin.reflect.typeOf
+
 
 class MainActivity : ComponentActivity() {
     private lateinit var scanTable: ScanTable
@@ -44,7 +51,8 @@ class MainActivity : ComponentActivity() {
     private var quantity by mutableStateOf("")
     private val scanLauncher = registerForActivityResult(ScanContract()) { result ->
         if (result.contents == null) {
-            Toast.makeText(this, "Не сохранено", Toast.LENGTH_SHORT).show()
+            CustomToastMakeText(this, "Не сохранено",
+                Toast.LENGTH_SHORT, android.graphics.Color.BLACK)
         } else {
             scanTable.add(result.contents)
             lastScannedCode = result.contents
@@ -108,10 +116,13 @@ class MainActivity : ComponentActivity() {
                 clearUI()
                 scanTable.clear()
             } catch (e: Exception) {
-                Toast.makeText(this, "Ошибка при попытке поделиться файлом: ${e.message}", Toast.LENGTH_SHORT).show()
+                CustomToastMakeText(this,
+                    "Ошибка при попытке поделиться файлом: ${e.message}",
+                    Toast.LENGTH_SHORT, android.graphics.Color.RED)
             }
         } else {
-            Toast.makeText(this, "Файл не найден!", Toast.LENGTH_SHORT).show()
+            CustomToastMakeText(this, "Файл не найден!", Toast.LENGTH_SHORT,
+                android.graphics.Color.BLACK)
         }
     }
 
@@ -127,15 +138,18 @@ class MainActivity : ComponentActivity() {
     @Composable
     fun MainScreen() {
         val context = LocalContext.current
-        var showError by remember { mutableStateOf(false) }
+        val showError by remember { mutableStateOf(false) }
 
         Column(
             modifier = Modifier
-                .fillMaxSize().padding(16.dp)
+                .fillMaxSize()
+                .padding(16.dp)
         ) {
             // Верхняя часть с изображением и текстом
             Box(
-                modifier = Modifier.fillMaxWidth().padding(10.dp)
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(10.dp)
             ) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -186,10 +200,14 @@ class MainActivity : ComponentActivity() {
             // Поле для ввода количества
             Row(
                 horizontalArrangement = Arrangement.Center,
-                modifier = Modifier.fillMaxWidth().padding(16.dp)
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp)
             ) {
                 Box(
-                    modifier = Modifier.width(120.dp).height(70.dp),
+                    modifier = Modifier
+                        .width(120.dp)
+                        .height(70.dp),
                     contentAlignment = Alignment.Center // Центрируем содержимое внутри Box
                 ) {
                     OutlinedTextField(
@@ -201,9 +219,9 @@ class MainActivity : ComponentActivity() {
                                 Regex("\\d{1,4}+(\\.\\d{0,3})?") // Нечеткие числа с 3 знаками после запятой
                             }
 
-                            // Проверяем, соответствует ли ввод регулярному выражению
-                            if (it.isEmpty() || regex.matches(it)) {
-                                quantity = it
+                            val cleanedInput = it.replace(" ", "")
+                            if (cleanedInput.isEmpty() || regex.matches(cleanedInput)) {
+                                quantity = cleanedInput
                             }
                         },
                         label = { Text(lastCount) },
@@ -237,14 +255,17 @@ class MainActivity : ComponentActivity() {
                         if (quantity.toDouble() > 0)
                             scanTable.saveChangesFromUser(quantity.toDouble())
                         else {
-                            Toast.makeText(
+                            CustomToastMakeText(
                                 this@MainActivity,
                                 "Введенное число больше 0.",
-                                Toast.LENGTH_SHORT
-                            ).show()
+                                Toast.LENGTH_SHORT,
+                                android.graphics.Color.RED
+                            )
                         }
                     } else {
-                        Toast.makeText(this@MainActivity, "Введите корректное число", Toast.LENGTH_SHORT).show()
+                        CustomToastMakeText(this@MainActivity,
+                            "Введите корректное число",
+                            Toast.LENGTH_SHORT,android.graphics.Color.RED)
                     }
                 },
                 modifier = Modifier
@@ -269,4 +290,39 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
+
+    fun CustomToastMakeText(context: Context, text: CharSequence, duration: Int, color: Int) {
+        // Проверяем, есть ли разрешение на отображение оверлея
+        if (!Settings.canDrawOverlays(context)) {
+            // Если разрешение не предоставлено, запрашиваем его
+            val intent = Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION)
+            // Запускаем активность для получения разрешения
+            (context as Activity).startActivityForResult(intent, REQUEST_CODE)
+        } else {
+            // Если разрешение есть, показываем кастомный Toast
+            CustomToast(context)
+                .setText(text.toString())
+                .setBackgroundColor(color)
+                .setTextColor(android.graphics.Color.WHITE)
+                .setTextSize(24f)
+                .setGravity(Gravity.CENTER_HORIZONTAL or Gravity.BOTTOM, 100)  // Центр по горизонтали и низ экрана
+                .show()
+        }
+    }
+
+    // В onActivityResult проверяем разрешение
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+
+        if (requestCode == REQUEST_CODE) {
+            // Если разрешение предоставлено, показываем кастомный Toast
+            if (!Settings.canDrawOverlays(this)) {
+                // Если пользователь отклонил разрешение, показываем обычный Toast
+                Toast.makeText(this, "Невозможно показать кастомный Toast без разрешения.",
+                    Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+
+
 }

@@ -252,12 +252,12 @@ class MainActivity : ComponentActivity() {
             Button(
                 onClick = {
                     if (quantity.isNotEmpty()) {
-                        if (quantity.toDouble() > 0)
+                        if (quantity.toDouble() >= 0.0)
                             scanTable.saveChangesFromUser(quantity.toDouble())
                         else {
                             CustomToastMakeText(
                                 this@MainActivity,
-                                "Введенное число больше 0.",
+                                "Введенное число меньше 0.",
                                 Toast.LENGTH_SHORT,
                                 android.graphics.Color.RED
                             )
